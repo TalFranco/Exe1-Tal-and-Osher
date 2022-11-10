@@ -1,0 +1,367 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <link href="StyleSheet.css" rel="stylesheet" />
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
+    <script>
+
+        class ingredient {
+
+            id;
+            name;
+            image;
+            calories;
+            //בנאי
+            constructor(id, name, image, calories) {
+                this.id = id;
+                this.name = name;
+                this.image = image;
+                this.calories = calories;
+            }
+
+            //מתודה שמרנדרת את פרטי המרכיבים הקיימים
+               ingredientRender() {
+                var str = "";
+                str += `<div class="col-2 col-lg-3" id='ingModalRe'>`;
+                str += `<h4>Ingredient details </h4>`;
+                str += `<img src="${this.image}"/>`;
+                str += `</br>`;
+                str += `<span>${this.name}</span>`;
+                str += `</br>`;
+                str += `<span>${this.calories}</span>`;
+                str += `</div>`;
+                str += `</div>`;
+                   
+                return str;
+                }
+        }
+
+        class DishRecipe {
+
+            name;
+            ingredients_In_Recipe;
+            time;
+            coockingMethod;
+            image;
+
+            constructor(name, ingredients_In_Recipe, time, coockingMethod, image ) {
+                this.name = name;
+                this.ingredients_In_Recipe = ingredients_In_Recipe;
+                this.time = time;
+                this.coockingMethod = coockingMethod;
+                this.image = image;
+            }
+
+            //מתודה שסוכמת את סך הקלוריות למתכון
+            totalCalories() {
+                var sum=0;
+                for (var i = 0; i < this.ingredients_In_Recipe.length; i++) {
+                    sum += this.ingredients_In_Recipe[i].calories;
+                }
+                return sum;
+            }
+
+            //מתודה שמרנדרת את פרטי המתכונים
+            recipeRender() {
+                let str = "";
+                str += `<div class="col-2 col-lg-3" id="Recipe_details">`;
+                str += `<h3>Recipe details </h3>`;
+                str += `<img src='${this.image}'/>`;
+                str += `</br>`;
+                str += `<span> Dish name: ${this.name}</span>`;
+                str += `</br>`;
+                str += `<span> Cooking method: ${this.coockingMethod}</span>`;
+                str += `</br>`;
+                str += `<span> Total cooking time: ${this.time} min</span>`;
+                str += `</br>`;
+                str += `<span> Total calories: ${this.totalCalories()} </span>`;
+                str += `</br>`;
+                str += `<button type="button" onclick="ShowRecipeIng('${this.name}')"  class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModalInginRecipe">Show ingredients</button>`;
+                str += `</div>`;
+
+                return str;
+            }
+
+        }
+
+        function init() {
+            //אתחול סטאטי של המרכיבים הראשוניים
+            ingredientsJson = [
+                {
+                    id: 1,
+                    name: "Broccoli",
+                    image: 'https://www.hopkinsmedicine.org/sebin/t/y/broccoli-content.jpg',
+                    calories: 34
+                },
+                {
+                    id: 2,
+                    name: "Cauliflower",
+                    image: 'https://www.veganhightechmom.com/wp-content/uploads/2016/12/DSC_0725.jpg',
+                    calories: 25
+                },
+                {
+                    id: 3,
+                    name: "Nudels",
+                    image: 'https://cdn.w600.comps.canstockphoto.co.il/%D7%A9%D7%95%D7%9C%D7%97%D7%9F-%D7%A8%D7%92%D7%A2-%D7%99%D7%91%D7%A9-%D7%90%D7%98%D7%A8%D7%99%D7%95%D7%AA-%D7%A2%D7%A5-%D7%90%D7%95-%D7%AA%D7%9E%D7%95%D7%A0%D7%94-%D7%9E%D7%A1%D7%97%D7%A8%D7%99%D7%AA_csp67435895.jpg',
+                    calories: 138
+                },
+                {
+                    id: 4,
+                    name: "Soy sauce",
+                    image: 'https://www.vitaminglobal.co.il/bmz_cache/8/856fd6e2a3bba3222b3aa0def7ff037d.image.500x500-statv-133.jpg',
+                    calories: 12
+                },
+            ]
+
+            allRecipes = [];
+            ingredients = [];
+
+            for (var i = 0; i < ingredientsJson.length; i++) {
+                var tempObj = new ingredient(ingredientsJson[i].id, ingredientsJson[i].name, ingredientsJson[i].image, ingredientsJson[i].calories)
+                ingredients.push(tempObj);
+            }
+            var firstIng = [...ingredients];
+
+            //אתחול סטאטי של המתכון הראשון
+            firstRecipe = new DishRecipe("Pad tahi", firstIng, 60, "wok", "https://th.bing.com/th/id/R.e93281cadf01c7b66bb36fc197dbdfd1?rik=xVuiVoqlvpQyjQ&riu=http%3a%2f%2fwww.thatslife.com.au%2fmedia%2f7863%2fissue_9_padthai.jpg&ehk=pgTqRyZ1fxZQuyGNOd%2b7hrew0Dy%2bcrMDo9zscpyjBoM%3d&risl=&pid=ImgRaw&r=0")
+            allRecipes.push(firstRecipe);
+            ShowCurrRecipe();
+        }
+
+        //פונקציה שמציגה את מרכיבי המתכון
+        function ShowRecipeIng(name) {
+            var str = `<div>`;
+            for (var i = 0; i < allRecipes.length; i++) {
+                if (allRecipes[i].name == name ) {
+
+                    for (var j = 0; j < allRecipes[i].ingredients_In_Recipe.length; j++) {
+                        str += allRecipes[i].ingredients_In_Recipe[j].ingredientRender();
+                    }
+                    document.getElementById("ingModal").innerHTML = str;
+                }
+
+            }
+
+        }
+
+        //פונקציה שמציגה את המתכונים הקיימים
+        function ShowCurrRecipe() {
+            var str = "";
+            for (var i = 0; i < allRecipes.length; i++) {
+                str += allRecipes[i].recipeRender();
+            }
+            document.getElementById("showRecipe").innerHTML = str;
+        }
+
+        //פונקצייה שמוסיפה מתכון חדש
+        function AddRecipe() {
+
+            var recipeName = document.getElementById("recipeName").value;
+            var cookingTime = document.getElementById("cookingTime").value;
+            var cookingMethod = document.getElementById("cookingMethod").value;
+            var recipeImage = document.getElementById("recipeImage").value;
+            recipeIngredients = []
+
+            for (var i = 0; i < ingredients.length; i++) {
+                if (document.getElementById(`${ingredients[i].id}`).checked) {
+                    recipeIngredients.push(ingredients[i]);
+                }
+            }
+            //בדיקות תקינות נתונים
+            if (/^[A-Za-z\s]*$/.test(recipeName) && cookingTime > 0 && /^[A-Za-z\s]*$/.test(cookingMethod) && recipeIngredients.length>0 ) {
+                var tempObj = new DishRecipe(recipeName, recipeIngredients, cookingTime, cookingMethod, recipeImage);
+                allRecipes.push(tempObj);
+            }
+            else {
+                alert('Please enter valid input');
+            }
+
+            ShowCurrRecipe();
+        }
+
+        //פונקציית עז לניקוי ערכים בשדות הטקסט
+        function clearRecipe() {
+            for (var i = 0; i < ingredients.length; i++) {
+                if (document.getElementById(`${ingredients[i].id}`).checked) {
+                    document.getElementById(`${ingredients[i].id}`).checked = false;
+                }
+            }
+            document.getElementById("recipeName").value = "";
+            document.getElementById("cookingTime").value = "";
+            document.getElementById("cookingMethod").value = "";
+            document.getElementById("recipeImage").value = "";
+        }
+
+        //פונקציה שמוסיפה מרכיבים חדשים
+        function AddIngredient() {
+
+            var ingredientName = document.getElementById("ingredientName").value;
+            var ingredientImg = document.getElementById("ingredientImg").value;
+            var ingredientCalories = document.getElementById("ingredientCalories").value;
+
+            //בדיקת תקינות ערכים
+            if (/^[A-Za-z\s]*$/.test(ingredientName) && ingredientCalories > 0) {
+                const tempING = new ingredient(ingredients.length + 1, ingredientName, ingredientImg, ingredientCalories);
+                ingredients.push(tempING);
+            }
+            else {
+                alert('Please enter valid input');
+            }
+        }
+
+        //פונקציה שמרנדרת את הצ'ק בוקס בהוספת מתכון
+        function WriteMyIng() {
+            var str = "";
+            for (var j = 0; j < ingredients.length; j++) {
+                str += `<div>`;
+                str += `<div class="col-2 col-lg-3">`;
+                str += `<lable>Add </lable>`;
+                str += `<input id=${ingredients[j].id} type="checkbox"/>`;
+                str += `</div>`;
+
+                str += ingredients[j].ingredientRender();
+            }
+            document.getElementById("currIngredients").innerHTML = str; 
+        }
+
+        //פונקציית עז לניקוי ערכים בשדות הטקסט
+        function clearIng() {
+            document.getElementById("ingredientName").value = "";
+            document.getElementById("ingredientImg").value = "";
+            document.getElementById("ingredientCalories").value = "";
+        }
+
+    </script>
+
+
+</head>
+
+<body onload="init()">
+    <div class="container-fluid">
+        <div class="row" id="header_row">
+            <h2>My kitchen</h2>
+            <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModalINGREDIENT">Add ingredient</button>
+            <button type="button" class="btn btn-info btn-lg" data-toggle="modal" onclick="WriteMyIng()" data-target="#myModalRECIPE">Add recipe</button>
+        </div>
+        
+        <div class="row" id="showRecipe"></div>
+
+        <!-- Modal ingredient-->
+        <div class="modal fade" id="myModalINGREDIENT" role="dialog">
+                <div class="modal-dialog">
+
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                            <h4 class="modal-title">New ingredient</h4>
+                        </div>
+
+                        <div class="modal-body">
+                            <div class="form-group required">
+                                <lSabel>Ingredient name</lSabel>
+                                <input type="text" id="ingredientName" class="form-control text-lowercase" required="" value="" />
+                            </div>
+
+                            <div class="form-group required">
+                                <lSabel>Ingredient image (URL)</lSabel>
+                                <input type="text" id="ingredientImg" class="form-control text-lowercase" required="" value="" />
+                            </div>
+
+                            <div class="form-group required">
+                                <lSabel>Ingredient calories</lSabel>
+                                <input type="text" id="ingredientCalories" class="form-control text-lowercase" required="" value="" />
+                            </div>
+                        </div>
+
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-default" data-dismiss="modal" onclick="AddIngredient(),clearIng()">Add ingredient</button>
+                            <button type="button" class="btn btn-default" data-dismiss="modal" onclick="clearIng()">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        <!-- Modal recipe-->
+        <div class="modal fade" id="myModalRECIPE" role="dialog">
+            <div class="modal-dialog">
+
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">New recipe</h4>
+                    </div>
+
+                    <div class="modal-body">
+                        <div class="form-group required">
+                            <lSabel>Recipe name</lSabel>
+                            <input type="text" class="form-control text-lowercase" id="recipeName" />
+                        </div>
+
+
+                        <div class="form-group required">
+                            <lSabel>Recipe cooking method</lSabel>
+                            <input type="text" class="form-control text-lowercase" id="cookingMethod" />
+                        </div>
+
+                        <div class="form-group required">
+                            <lSabel>Recipe coocking time</lSabel>
+                            <input type="text" class="form-control text-lowercase" id="cookingTime" />
+                        </div>
+
+                        <div class="form-group required">
+                            <lSabel>Recipe image (URL)</lSabel>
+                            <input type="text" class="form-control text-lowercase" id="recipeImage" />
+                        </div>
+                    </div>
+
+
+                    <!--show current ingredients-->
+                    <div class="row" >
+                        <div class="col" id="currIngredients"></div>
+                    </div>
+
+
+                    <div class="modal-footer">
+                        <br />
+                        <button type="button" class="btn btn-default" data-dismiss="modal" onclick="AddRecipe(),clearRecipe()">Add recipe</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal" onclick="clearRecipe()">Close</button>
+                    </div>
+                </div>
+
+
+
+            </div>
+        </div>
+
+        <!-- Modal ingredients in recipe-->
+        <div class="modal fade " id="myModalInginRecipe" role="dialog">
+            <div class="modal-dialog">
+
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">The ingredients</h4>
+                    </div>
+
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col form-group required " id="ingModal"></div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</body>
+
+</html>
